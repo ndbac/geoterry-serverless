@@ -1,45 +1,53 @@
 {
-  "name": "aws-node-dynamic-image-resizer",
-  "version": "1.0.0",
-  "license": "MIT",
-  "author": "Sebastian Borza",
+  "name": "geoterry-serverless",
+  "version": "1.1.0",
+  "main": "handler.js",
   "scripts": {
-    "eslint": "eslint ./src",
-    "deploy": "SLS_DEBUG=* sls deploy --stage $STAGE --region $REGION --verbose",
-    "deploy:local": "export $(cat ./config/.env | xargs) && serverless deploy --stage $STAGE --region $REGION --verbose",
-    "remove:stack": "export $(cat ./config/.env | xargs) && sls remove -s $STAGE",
-    "offline": "export $(cat ./config/.env | xargs) && serverless offline start --stage $STAGE",
-    "add:env": "./config/push-secret.sh"
+    "build": "npx tsc",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "prettier": "prettier --config .prettierrc '**/*.ts' --write",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
+    "lint:check": "eslint \"{src,test}/**/*.ts\"",
+    "format": "prettier --write \"{src,test}/**/*.ts\"",
+    "format:check": "prettier --check \"{src,test}/**/*.ts\"",
+    "prepare": "husky install"
   },
   "dependencies": {
-    "@babel/runtime": "^7.3.1",
-    "babel-runtime": "^7.0.0-beta.3",
-    "lodash": "^4.17.19",
-    "serverless-offline": "^4.7.0",
-    "serverless-webpack": "^5.2.0",
-    "sharp": "^0.21.3",
-    "source-map-support": "^0.5.10",
+    "aws-lambda": "^1.0.7",
+    "heic-convert": "^1.2.4",
+    "sharp": "^0.30.7",
     "stream": "^0.0.2"
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.3.4",
-    "@babel/plugin-transform-runtime": "^7.2.0",
-    "@babel/preset-env": "^7.3.1",
-    "aws-sdk": "^2.409.0",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^24.1.0",
-    "babel-loader": "^8.0.5",
-    "babel-plugin-source-map-support": "^2.0.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-3": "^6.24.1",
-    "jest": "^23.6.0",
-    "serverless": "^1.35.1",
-    "webpack": "^4.28.3",
-    "webpack-node-externals": "^1.7.2"
+    "@commitlint/config-conventional": "^16.0.0",
+    "@types/aws-lambda": "^8.10.78",
+    "@types/heic-convert": "^1.2.0",
+    "@types/sharp": "^0.30.4",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "aws-sdk": "^2.1557.0",
+    "commitlint": "^18.4.3",
+    "eslint": "^8.9.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.2.1",
+    "prettier": "^2.5.1",
+    "serverless": "^3.38.0",
+    "serverless-bundle": "^6.1.0",
+    "serverless-prune-plugin": "^2.0.2",
+    "typescript": "^4.5.4"
   },
-  "resolutions": {
-    "babel-core": "7.0.0-bridge.0"
+  "lint-staged": {
+    "src/**/*.{js,ts}": [
+      "eslint --cache --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "test/**/*.ts": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
   }
 }

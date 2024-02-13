@@ -1,73 +1,38 @@
-service:
-  name: ${self:custom.serviceName}
+service: geoterry-sls
 
-frameworkVersion: "3"
-
-plugins:
-  - serverless-offline
-  - serverless-webpack
+custom:
+  checkly_sls_config: ${file(./config/${self:provider.stage}.yml)}
+  prune:
+    automatic: true
+    number: 3
+  bundle:
+    packagerOptions:
+      scripts:
+        - rm -rf node_modules/sharp && npm install --arch=x64 --platform=linux --target=10.15.0 sharp
 
 provider:
   name: aws
-  runtime: nodejs18.x
-  profile: dev-fii
+  runtime: nodejs14.x
+  timeout: 20
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ap-southeast-1'}
 
-  usagePlan:
-    quota:
-      limit: 100
-      offset: 2
-      period: MONTH
-    throttle:
-      burstLimit: 100
-      rateLimit: 50
-
-custom:
-  serviceName: image-resizing
-  stage: ${opt:stage, self:custom.defaultStage}
-  bucket: dynamic-image-resizing
-  webpack:
-    includeModules:
-      forceExclude:
-        - aws-sdk
-  defaultStage: dev
-  stages:
-    - ${opt:stage}
-    - dev
-    - integration
-    - production
+plugins:
+  - serverless-bundle
+  - serverless-prune-plugin
 
 functions:
-  resize:
-    handler: src/handlers/resizer/index.handler
+  otf-resize-image:
+    handler: src/handler.triggerResizeImageToS3
+    logRetentionInDays: 5
+    timeout: 20
     events:
-      - http:
-          path: /{size}/{image}
-          method: get
+      - s3:
+          bucket: ${self:custom.checkly_sls_config.aws.s3.staticBucket.name}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: geoterry/photo/original
+          existing: true
     environment:
-      # Provide your bucket name here
-      BUCKET: dynamic-image-resizing
-      REGION: us-east-1
-    # layers:
-    #   - {Ref: ImageLibsLambdaLayer}
-    iamRoleStatements:
-      - Effect: "Allow"
-        Action:
-          - "s3:GetObject"
-        Resource: "arn:aws:s3:::dynamic-image-resizing/*"
-      - Effect: "Allow"
-        Action:
-          - "s3:PutObject"
-        Resource: "arn:aws:s3:::dynamic-image-resizing/*"
-
-package:
-  exclude:
-    - layer/**
-    - node_modules/**
-    - '!node_modules/babel-runtime/**'
-    - '!node_modules/sharp/**'
-
-# layers:
-#   imageLibs:
-#     path: layer
-#     compatibleRuntimes:
-#       - nodejs12.x
+      ENVIRONMENT: ${self:provider.stage}
+      CHECKLY_STORAGE_BUCKET: ${self:custom.checkly_sls_config.aws.s3.staticBucket.name}

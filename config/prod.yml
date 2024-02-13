@@ -1,0 +1,4 @@
+aws:
+  s3:
+    staticBucket:
+      name: storage.checkly.vn
