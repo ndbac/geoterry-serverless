@@ -7,13 +7,12 @@ import { convertSizeToString } from './utils/helpers';
 export const triggerResizeImageToS3 = async (event: S3Event) => {
   try {
     infoLog(event, 'Start resizing image');
-    await Promise.allSettled(
+    await Promise.all(
       event.Records.map(async (record) => {
         const paths = record.s3.object.key.split('/');
         const filename = paths.pop();
-        infoLog({ paths, filename }, 'Resizing image');
         paths.pop();
-        await Promise.allSettled(
+        return Promise.all(
           ACCEPTED_SIZES.map(async (size) => {
             return resizeImageAndUploadToS3({
               objectKey: record.s3.object.key,

@@ -16,6 +16,8 @@ provider:
   timeout: 20
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ap-southeast-1'}
+  iam:
+    role: arn:aws:iam::432590225625:role/geoterry-lambda-role
 
 plugins:
   - serverless-bundle

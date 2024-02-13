@@ -8,7 +8,6 @@ import {
 } from './constants';
 import { getObject, getObjectSize, uploadToS3 } from './s3.helpers';
 import convert from 'heic-convert';
-import { infoLog } from './logger.helpers';
 
 export const resizeImage = async (
   original: Buffer,
@@ -42,7 +41,6 @@ export const resizeImageAndUploadToS3 = async (options: {
   const imageType = getImageType(objectKey);
   let resizedImage = original;
   let imageAsBase64 = original.toString('base64');
-  infoLog({ imageType, isResizable }, 'Finnish get original image to process');
 
   if (isResizable) {
     resizedImage = await resizeImage(original, resizeOptions);
@@ -63,7 +61,6 @@ export const resizeImageAndUploadToS3 = async (options: {
     if (convertedImage) {
       imageAsBase64 = convertedImage.toString('base64');
       const uploadKey = `${objectKey}.${convertToExt.toLowerCase()}`;
-      infoLog({ uploadKey }, 'Uploading image after converted');
       await uploadToS3({
         body: convertedImage,
         key: uploadKey
@@ -72,7 +69,6 @@ export const resizeImageAndUploadToS3 = async (options: {
   }
 
   if (isResizable) {
-    infoLog({ uploadKey }, 'Uploading image');
     await uploadToS3({
       body: resizedImage,
       key: uploadKey
